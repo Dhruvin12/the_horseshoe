@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Beyond the Horseshoe</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --scarlet: #ba0c2f;
+    --scarlet-dark: #8a0a23;
+    --gray: #666;
+    --paper: #faf8f5;
+    --ink: #1f1f1f;
+    --line: #e2ddd5;
+    --soft: #f1ece4;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: "Source Sans 3", system-ui, sans-serif;
+    font-size: 18px;
+    line-height: 1.6;
+    color: var(--ink);
+    background: var(--paper);
+  }
+  header {
+    background: var(--ink);
+    color: #fff;
+    padding: 1.1rem 1.5rem 0;
+  }
+  .brand {
+    font-family: "Fraunces", Georgia, serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+  }
+  .brand span { color: #ff8a9e; }
+  nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    margin-top: 0.8rem;
+  }
+  nav a {
+    color: #ddd;
+    text-decoration: none;
+    padding: 0.55rem 0.9rem;
+    border-radius: 6px 6px 0 0;
+    font-weight: 600;
+    font-size: 0.95rem;
+  }
+  nav a:hover, nav a:focus { color: #fff; background: #333; }
+  nav a[aria-current="page"] { background: var(--paper); color: var(--scarlet); }
+  main { max-width: 860px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+  section[data-page] { display: none; }
+  section[data-page].active { display: block; }
+  h1, h2, h3 { font-family: "Fraunces", Georgia, serif; line-height: 1.2; }
+  h1 { font-size: 2.4rem; margin: 0.2rem 0 0.8rem; }
+  h2 { font-size: 1.6rem; margin-top: 2.2rem; }
+  h3 { font-size: 1.25rem; margin-bottom: 0.3rem; }
+  .kicker { color: var(--scarlet); font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; font-size: 0.85rem; }
+  .lead { font-size: 1.2rem; color: #333; }
+  .question {
+    border-left: 5px solid var(--scarlet);
+    background: #fff;
+    padding: 1rem 1.25rem;
+    margin: 1.5rem 0;
+    font-size: 1.1rem;
+  }
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 1rem; margin-top: 1rem; }
+  .card {
+    background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 1rem 1.1rem;
+    text-decoration: none; color: inherit; display: block;
+  }
+  .card:hover, .card:focus { border-color: var(--scarlet); }
+  .card strong { display: block; font-family: "Fraunces", Georgia, serif; font-size: 1.15rem; color: var(--scarlet-dark); }
+  figure { margin: 1.5rem 0; }
+  .photo-slot {
+    aspect-ratio: 4 / 3;
+    background: repeating-linear-gradient(45deg, var(--soft), var(--soft) 12px, #ebe4d9 12px, #ebe4d9 24px);
+    border: 2px dashed #c9bfae;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center; text-align: center;
+    padding: 1rem; color: #7a6f5f; font-weight: 600;
+  }
+  figcaption { font-size: 0.95rem; color: #444; margin-top: 0.5rem; }
+  .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  @media (max-width: 640px) { .pair { grid-template-columns: 1fr; } h1 { font-size: 1.9rem; } }
+
+  /* timeline */
+  .tl-controls { position: sticky; top: 0; background: var(--paper); padding: 0.75rem 0; z-index: 2; border-bottom: 1px solid var(--line); }
+  .tl-buttons { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+  .tl-buttons button {
+    font: inherit; font-size: 0.9rem; font-weight: 600;
+    border: 1px solid var(--line); background: #fff; color: var(--ink);
+    padding: 0.4rem 0.75rem; border-radius: 999px; cursor: pointer;
+  }
+  .tl-buttons button[aria-pressed="true"] { background: var(--scarlet); color: #fff; border-color: var(--scarlet); }
+  .tl-range { width: 100%; margin-top: 0.6rem; accent-color: var(--scarlet); }
+  .stop { display: none; padding-top: 1rem; }
+  .stop.active { display: block; }
+  .stop .years { font-family: "Fraunces", Georgia, serif; font-size: 2.6rem; color: var(--scarlet); margin: 0; }
+  .stop-nav { display: flex; justify-content: space-between; margin-top: 2rem; }
+  .stop-nav button {
+    font: inherit; font-weight: 600; background: var(--ink); color: #fff; border: 0;
+    padding: 0.6rem 1rem; border-radius: 6px; cursor: pointer;
+  }
+  .stop-nav button:disabled { opacity: 0.3; cursor: default; }
+  .label { display: inline-block; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--gray); margin-top: 1rem; }
+  .src { font-size: 0.9rem; color: var(--gray); }
+
+  /* concept chain */
+  .chain { display: grid; gap: 0.6rem; margin: 1.5rem 0; }
+  .chain details { background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 0.8rem 1rem; }
+  .chain summary { cursor: pointer; font-weight: 600; }
+  .chain summary b { color: var(--scarlet); }
+  .arrow { text-align: center; color: var(--scarlet); font-size: 1.2rem; line-height: 1; }
+
+  .works p { padding-left: 2.5em; text-indent: -2.5em; margin: 0 0 0.9rem; }
+  .url { word-break: break-all; }
+  .note { background: #fff7e0; border: 1px solid #edd9a3; border-radius: 8px; padding: 0.8rem 1rem; font-size: 0.95rem; }
+  footer { text-align: center; color: var(--gray); font-size: 0.85rem; padding: 2rem 1rem; border-top: 1px solid var(--line); }
+  a { color: var(--scarlet-dark); }
+  :focus-visible { outline: 3px solid #ffb400; outline-offset: 2px; }
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">Beyond the <span>Horseshoe</span></div>
+  <nav aria-label="Site pages">
+    <a href="#home">Home</a>
+    <a href="#timeline">Timeline</a>
+    <a href="#why">Why It Changed</a>
+    <a href="#who">Who It Was For</a>
+    <a href="#statement">Researcher's Statement</a>
+    <a href="#works-cited">Works Cited</a>
+  </nav>
+</header>
+
+<main>
+
+<!-- HOME -->
+<section data-page="home">
+  <h1>Beyond the Horseshoe</h1>
+  <p class="lead">This site is about Ohio Stadium, but not really the stadium itself. It's about the land around it, and how that land changed over the last 100 years.</p>
+
+  <figure>
+    <div class="pair">
+      <div class="photo-slot" role="img" aria-label="Placeholder for MP1 archive photo of Ohio Stadium in the 1920s">WIP</div>
+      <div class="photo-slot" role="img" aria-label="Placeholder for MP1 archive photo of Ohio Stadium in the 1970s">WIP</div>
+    </div>
+    <figcaption>[Draft caption: Ohio Stadium in the 1920s (left) and 1970s (right), from the Ohio State University Archives.]</figcaption>
+  </figure>
+
+  <p>For my first project this semester, I looked at old photos of Ohio Stadium from the Ohio State University Archives. I had one from the 1920s and one from the 1970s. The stadium looked pretty much the same in both. What surprised me was everything around it. In the 1920s photo there's a lot of empty land. By the 1970s it's full of parking lots and buildings.</p>
+
+  <p>So I started wondering how that happened. Who decided what went there? Was it planned? That turned into my research question:</p>
+
+  <div class="question"><strong>Research question:</strong> How did Ohio State plan the development of the land around Ohio Stadium after the stadium was built, and how did the stadium influence the growth of the surrounding campus and neighborhoods?</div>
+
+  <p>Here's what I think, after a semester of looking into it. The land around the stadium didn't fill up by accident. Ohio State built things there because the university needed them. It needed parking for fans, dorms for more students, and space for other sports. Once the stadium was there, a lot of other buildings ended up near it.</p>
+
+  <p>I also think the official records only show the university's side. Students and people living nearby probably saw these changes differently, and that's something I'm still trying to find out.</p>
+
+  <p>I made this site for other Ohio State students, fans, and people in Columbus. If you've been to a game, you've walked through this area. You don't need to know anything about research to follow along.</p>
+
+  <h2>Where to go next</h2>
+  <div class="cards">
+    <a class="card" href="#timeline"><strong>Timeline</strong>Click through the changes from before 1919 to today.</a>
+    <a class="card" href="#why"><strong>Why It Changed</strong>An idea from my main source that helped me make sense of it.</a>
+    <a class="card" href="#who"><strong>Who It Was For</strong>Fans, students and neighbors.</a>
+    <a class="card" href="#statement"><strong>Researcher's Statement</strong>Why I made the site this way.</a>
+  </div>
+</section>
+
+<!-- TIMELINE -->
+<section data-page="timeline">
+  <h1>Timeline</h1>
+  <p>Click a year, drag the slider, or use the buttons at the bottom to go through it in order.</p>
+
+  <div class="tl-controls">
+    <div class="tl-buttons" role="group" aria-label="Choose a time period" id="tlButtons"></div>
+    <label class="src" for="tlRange">Or drag through time:</label>
+    <input type="range" id="tlRange" class="tl-range" min="0" value="0">
+  </div>
+
+  <div id="stops">
+    <article class="stop" data-label="Before 1919">
+      <p class="years">Before 1919</p>
+      <h2>Ohio Field gets too small</h2>
+      <p>Before the Horseshoe, Ohio State played at a place called Ohio Field. It only held about 14,000 people. Football was getting more popular, and the crowds were too big for it. By 1915 an engineering professor, Thomas E. French, was pushing for a new stadium.</p>
+      <p>So the whole thing started because the university needed more seats. Ohio Field was torn down in 1924, after the new stadium opened, and other buildings went up where it used to be.</p>
+      <p class="src">Sources: Kelly and Bona; Ohio State University Libraries, "Twelve Days of Buckeyes."</p>
+    </article>
+
+    <article class="stop" data-label="1919">
+      <p class="years">1919</p>
+      <h2>92 acres by the river</h2>
+      <p>In 1919, Ohio State's Board of Trustees set aside 92 acres west of Neil Avenue, next to the Olentangy River, for the stadium. The trustees are the group that makes the big decisions for the university. A lot of this land was farmland, and they actually had to wait for the crops to be harvested before they could start. The trustees didn't want to use state money, so alumni raised $1 million in donations instead.</p>
+      <p>To me this is the most important decision in the whole story. The stadium didn't need all 92 acres, so the university had extra land right next to it. The city and the neighbors didn't make this call. The trustees did. I want to read the trustee records from this time to see if they were already planning what to do with the rest of the land.</p>
+      <figure>
+        <div class="photo-slot" role="img" aria-label="Placeholder for an archive map of the stadium site">[Add archive map or aerial photo of the site, around 1919 to 1921]</div>
+        <figcaption>[Draft caption: Describe what the map or photo shows, like farmland, the river and Neil Avenue, and give the archive title, date and ID.]</figcaption>
+      </figure>
+      <p class="src">Sources: Kelly and Bona; Lopresti; Ohio State University Libraries, "Twelve Days of Buckeyes."</p>
+    </article>
+
+    <article class="stop" data-label="1921–1922">
+      <p class="years">1921–1922</p>
+      <h2>Building it</h2>
+      <p>The architect was Howard Dwight Smith, who went to Ohio State. He designed the horseshoe shape with two levels of seats. The land was low and right by the river, so it could flood. To make it work, they straightened a bend in the river and moved the drainage ditches into sewers. They even built a small railroad just to bring in sand, gravel and wood.</p>
+      <p>The first game was against Ohio Wesleyan on October 7, 1922. The official dedication was at the Michigan game two weeks later, on October 21.</p>
+      <p>I didn't know before this project that they changed the river. It shows that even at the very start, the university was willing to change the land to fit the stadium.</p>
+      <p class="src">Sources: Lopresti; Ohio State University Libraries, "Twelve Days of Buckeyes."</p>
+    </article>
+
+    <article class="stop" data-label="1920s–1940s">
+      <p class="years">1920s–1940s</p>
+      <h2>Mostly open land</h2>
+      <p>For a long time after the stadium opened, there wasn't much around it. University records mention polo fields south of the stadium. Those fields flooded when the river got high in 1927 and again in 1937.</p>
+      <p>One thing I found interesting is that the stadium was used for more than football. For a while, students who didn't have much money lived inside it as a cheap dorm. I'd like to find out more about that, like who lived there and when it stopped.</p>
+      <p>This is what my 1920s photo shows. A big stadium with a lot of space around it.</p>
+      <figure>
+        <div class="photo-slot" role="img" aria-label="Placeholder for MP1 archive photo of open land near the stadium">[Add MP1 photo: open land around the stadium]</div>
+        <figcaption>[Draft caption: Describe the open land and the river in the photo, with its archive title, date and ID.]</figcaption>
+      </figure>
+      <p class="src">Source: Ohio State University Libraries, "Twelve Days of Buckeyes."</p>
+    </article>
+
+    <article class="stop" data-label="1944–1956">
+      <p class="years">1944–1956</p>
+      <h2>The arena that almost got attached</h2>
+      <p>In 1944, there was a plan to attach an eight-sided building to the north end of the stadium. It would have been a field house for other sports. People were against it, and the plan got dropped. Instead, St. John Arena was built about 500 feet away. It was finished in November 1956, and French Field House was built right next to it. Smith designed the arena too.</p>
+      <p>This fits what I think was going on. When the university needed a basketball arena, it put it right by the stadium. But this is also a time when people pushed back and actually changed the plan. I want to look in old issues of The Lantern from 1944 to find out who was against it.</p>
+      <p class="src">Sources: Kelly and Bona; Ohio State University Libraries, "St. John Arena &amp; French Field House."</p>
+    </article>
+
+    <article class="stop" data-label="1965–1967">
+      <p class="years">1965–1967</p>
+      <h2>The Towers</h2>
+      <p>Lincoln and Morrill Towers were started in 1965 and finished in August 1967. They're the two tall dorms on Cannon Drive, right next to the stadium. Each one is 26 stories and held 1,920 students. They were also the first dorms on campus where men and women both lived.</p>
+      <p>The original plan was actually six towers, not two. Only two got built. According to the university archives, people on campus argued a lot about where to put them, and the records don't say for sure why the other four never happened.</p>
+      <p>Ohio State was growing fast in the 1960s and needed housing. It already owned the open land near the stadium, so that's where the towers went. This is when the area starts to look like my 1970s photo.</p>
+      <figure>
+        <div class="photo-slot" role="img" aria-label="Placeholder for archive photo of Lincoln and Morrill Towers near the stadium">[Add archive photo: the Towers and the stadium, late 1960s]</div>
+        <figcaption>[Draft caption: Describe the towers, the stadium and the lots around them, with archive title, date and ID.]</figcaption>
+      </figure>
+      <p class="src">Sources: DePaola; Ohio State University Libraries, "Cramped Quarters at the Towers" and "Lincoln Tower."</p>
+    </article>
+
+    <article class="stop" data-label="1970s">
+      <p class="years">1970s</p>
+      <h2>Filled in</h2>
+      <p>By my 1970s photo, most of the open land is gone. There are parking lots, the arena, the field house and the towers all around the stadium. The stadium itself still looks almost the same as it did 50 years earlier.</p>
+      <p>I think this makes sense if you think about what a stadium needs. You can't have tens of thousands of people show up for a game with nowhere to park. And a university that keeps getting bigger needs somewhere to put students and teams. Because the stadium was already there, a lot of that ended up next to it.</p>
+      <figure>
+        <div class="photo-slot" role="img" aria-label="Placeholder for MP1 archive photo from the 1970s">[Add MP1 photo: stadium and surroundings, 1970s]</div>
+        <figcaption>[Draft caption: Point out the parking lots and buildings that weren't there in the 1920s photo.]</figcaption>
+      </figure>
+      <p class="src">Source: my Major Project 1 archive photos.</p>
+    </article>
+
+    <article class="stop" data-label="1990s–2010s">
+      <p class="years">1990s–2010s</p>
+      <h2>Moving east</h2>
+      <p>The stadium got updated and made bigger a few times, including a big renovation that was done in 2001. Around this same time, Ohio State started working on the neighborhoods east of campus. It set up a group called Campus Partners, put out <em>A Plan for High Street</em> in 2000, built the South Campus Gateway, and later got involved in rebuilding Weinland Park.</p>
+      <p>This is what my main source from MP2, Sayoni Bose, writes about. She found that when Ohio State moved into those neighborhoods, it listened to homeowners and businesses a lot more than poor renters. The stadium side was different because the university already owned most of it. There weren't as many neighbors there to push back.</p>
+      <p class="src">Sources: Bose; Campus Partners; Ohio State University Libraries, "Twelve Days of Buckeyes."</p>
+    </article>
+
+    <article class="stop" data-label="Today">
+      <p class="years">Today</p>
+      <h2>Now</h2>
+      <p>Today the stadium is surrounded by St. John Arena, French Field House, the Towers, and a lot of parking. On game days the whole area is basically there for the stadium. The rest of the week, students use a lot of it.</p>
+      <p>Looking at all of this together, I keep coming back to the same thing. The university made almost every decision about this land, and it usually made them based on what it needed at the time. What I don't know yet is what students and neighbors thought about it back then. That's the next thing I'm working on.</p>
+      <figure>
+        <div class="pair">
+          <div class="photo-slot" role="img" aria-label="Placeholder for MP1 archive photo">[Add MP1 archive photo]</div>
+          <div class="photo-slot" role="img" aria-label="Placeholder for present-day photo taken from the same spot">[Add present-day photo from the same spot]</div>
+        </div>
+        <figcaption>[Draft caption: Then and now from about the same spot. Say what's the same and what changed. Note that the new photo is your own.]</figcaption>
+      </figure>
+    </article>
+  </div>
+
+  <div class="stop-nav">
+    <button type="button" id="prevStop">Previous</button>
+    <button type="button" id="nextStop">Next</button>
+  </div>
+</section>
+
+<!-- WHY -->
+<section data-page="why">
+  <h1>Why it changed</h1>
+  <p class="lead">The timeline shows what changed. This page is about why. Most of it comes from my main source from MP2.</p>
+
+  <p>The article is "Universities and the Redevelopment Politics of the Neoliberal City" by Sayoni Bose, from 2015. Bose went to grad school at Ohio State, and she used Ohio State as her example. Her main point is that universities today act a lot like businesses. They compete with other schools for students, money and rankings, and to keep up they have to grow. But a university can't just pack up its buildings and move somewhere else. So it grows where it already is, which makes the land next to campus really valuable to it.</p>
+
+  <p>She uses some words that were hard for me at first. Click on each one to see what it means. I put them in order because each one kind of leads to the next.</p>
+
+  <div class="chain">
+    <details>
+      <summary><b>Neoliberalism</b></summary>
+      <p>Basically the idea that everything should run like a business. Bose says this way of thinking has been shaping American cities since the 1970s. For a university, it means always feeling pressure to grow.</p>
+    </details>
+    <div class="arrow" aria-hidden="true">↓</div>
+    <details>
+      <summary><b>Entrepreneurial subject</b></summary>
+      <p>Bose got this term from a writer named Michel Foucault. It means a school that thinks like a company and takes charge of rebuilding the area around it. This was the part that helped me understand why Ohio State does what it does, and not just what it does.</p>
+    </details>
+    <div class="arrow" aria-hidden="true">↓</div>
+    <details>
+      <summary><b>Redevelopment</b></summary>
+      <p>Rebuilding an area, usually by tearing down what was there before. Bose points out that it sounds like a harmless word, but somebody usually loses something.</p>
+    </details>
+    <div class="arrow" aria-hidden="true">↓</div>
+    <details>
+      <summary><b>Subjectivities</b></summary>
+      <p>How people see themselves and other people. Bose says Ohio State used existing splits between rich and poor, and between races, to get homeowners and businesses on its side. Some poor renters ended up being treated like they were the problem.</p>
+    </details>
+    <div class="arrow" aria-hidden="true">↓</div>
+    <details>
+      <summary><b>Gentrification</b></summary>
+      <p>When people with more money move into a poorer area and the people who already lived there get pushed out. Bose says Ohio State brought new stores to High Street as a first step toward changing Weinland Park.</p>
+    </details>
+  </div>
+
+  <h2>What this has to do with the stadium</h2>
+  <p>Bose wrote about the east side of campus, mainly High Street and Weinland Park. She doesn't really talk about the stadium. But her question works for my project too: why does a university care so much about the land right next to it?</p>
+  <p>I think the stadium acted like an anchor. Once there was a giant stadium on the river that wasn't going anywhere, other big projects got built near it. The university was already there and already owned the land. If you look at a map, the arena, the field house, the towers and the parking lots are all bunched up around the Horseshoe.</p>
+  <p>There's one big difference from what Bose studied, though. On the east side, Ohio State had to deal with homeowners, renters and business owners. Around the stadium, the university had owned most of the land since 1919. That might be why there wasn't as much fighting over it. It also probably means the people most affected were students, and it's harder to find what students thought in official records.</p>
+
+  <h2>Other sources I'm checking</h2>
+  <p>Bose's reference list led me to two more sources. One is a book by David Perry and Wim Wiewel called <em>The University as Urban Developer</em>, which has examples of universities building in their cities. The other is an article by Ray Bromley and Robert Kent called "Integrating beyond the Campus," about Ohio's city universities, including Ohio State, and their work in nearby neighborhoods. Bose says these kinds of studies explain what universities do but not why. I'm reading them to see if what happened around the stadium matches what Bose describes.</p>
+</section>
+
+<!-- WHO -->
+<section data-page="who">
+  <h1>Who was it for?</h1>
+  <p>WIP</p>
+</section>
+
+<!-- STATEMENT -->
+<section data-page="statement">
+  <h1>Researcher's statement</h1>
+  <p>WIP</p>
+</section>
+
+<!-- WORKS CITED -->
+<section data-page="works-cited">
+  <h1>Works Cited</h1>
+  <p class="src">MLA 9th edition. URLs are written out as text for accessibility.</p>
+
+  <div class="works">
+    <h2>Primary sources (Major Project 1)</h2>
+    <p>WIP</p>
+
+    <h2>Secondary sources (Major Project 2)</h2>
+    <p>Bose, Sayoni. "Universities and the Redevelopment Politics of the Neoliberal City." <em>Urban Studies</em>, vol. 52, no. 14, 2015, pp. 2616–32.</p>
+    <p>Bromley, Ray, and Robert B. Kent. "Integrating beyond the Campus: Ohio's Urban Public Universities and Neighborhood Revitalization." <em>Planning, Practice &amp; Research</em>, vol. 21, no. 1, 2006, pp. 45–78.</p>
+    <p>Perry, David C., and Wim Wiewel, editors. <em>The University as Urban Developer: Case Studies and Analysis</em>. M. E. Sharpe / Lincoln Institute of Land Policy, 2005.</p>
+
+    <h2>Additional sources</h2>
+    <p>Campus Partners for Community Urban Redevelopment. <em>A Plan for High Street: Creating a 21st Century Main Street</em>. Campus Partners, 2000.</p>
+    <p>DePaola, Avery. "Time and Change: Morrill and Lincoln Towers." <em>Eleven Warriors</em>, 13 Jan. 2020, <span class="url">elevenwarriors.com/the-ohio-state-university/2020/01/111473/time-and-change-morrill-and-lincoln-towers</span>.</p>
+    <p>Kelly, Phil, and Nick Bona. "Hidden Histories: Ohio Stadium's Humble Beginnings to Cherished Buckeye Landmark." <em>ABC6</em>, 26 Aug. 2025, <span class="url">abc6onyourside.com/good-day-columbus/around-town/hidden-histories-ohio-stadium-horseshoe-design-the-shoe-buckeye-landmark-osu-football-the-ohio-state-university</span>.</p>
+    <p>Lopresti, Mike. "Great, Odd and Downright Screwball Moments in 100 Years of Ohio Stadium History." <em>NCAA.com</em>, 4 Oct. 2022, <span class="url">www.ncaa.com/news/football/article/2022-10-04/great-odd-and-downright-screwball-moments-100-years-ohio-stadium-history</span>.</p>
+    <p>Namigadde, Adora. "Weinland Park Worries." <em>Chasing the Dream</em>, PBS, 6 Nov. 2017.</p>
+    <p>Ohio State University Libraries. "Cramped Quarters at the Towers." <em>From Woody's Couch</em>, 25 Aug. 2011, <span class="url">library.osu.edu/site/archives/2011/08/25/cramped-quarters-at-the-towers/</span>.</p>
+    <p>---. "Lincoln Tower." <em>Buckeye Stroll</em>, <span class="url">library.osu.edu/site/buckeyestroll/lincoln-tower/</span>.</p>
+    <p>---. "St. John Arena &amp; French Field House." <em>Buckeye Stroll</em>, <span class="url">library.osu.edu/site/buckeyestroll/st-john-arena-french-field-house</span>.</p>
+    <p>---. "Twelve Days of Buckeyes: Fun Facts about Ohio Stadium." <em>From Woody's Couch</em>, 19 Dec. 2011, <span class="url">library.osu.edu/site/archives/?p=992</span>.</p>
+    <p>Weinland Park Collaborative. <em>The Story of Weinland Park: The Role of Early Education in Neighborhood Revitalization</em>. Paul Werth Associates, 2018.</p>
+    <p>[Add Lantern articles and trustee records as you find them, for example: "Article Title." <em>The Lantern</em>, Day Month Year, p. #. Ohio State University Publication Archives, osupublicationarchives.osu.edu.]</p>
+  </div>
+</section>
+
+</main>
+
+<footer>Beyond the Horseshoe · Major Project 3</footer>
+
+<script>
+  // page routing on the hash
+  const pages = [...document.querySelectorAll('section[data-page]')];
+  const links = [...document.querySelectorAll('nav a')];
+  function show() {
+    const name = (location.hash || '#home').slice(1);
+    const target = pages.find(p => p.dataset.page === name) || pages[0];
+    pages.forEach(p => p.classList.toggle('active', p === target));
+    links.forEach(a => a.toggleAttribute('aria-current', a.getAttribute('href') === '#' + target.dataset.page));
+    links.forEach(a => { if (a.hasAttribute('aria-current')) a.setAttribute('aria-current', 'page'); });
+    window.scrollTo(0, 0);
+  }
+  window.addEventListener('hashchange', show);
+  show();
+
+  // timeline
+  const stops = [...document.querySelectorAll('.stop')];
+  const btnWrap = document.getElementById('tlButtons');
+  const range = document.getElementById('tlRange');
+  const prev = document.getElementById('prevStop');
+  const next = document.getElementById('nextStop');
+  range.max = stops.length - 1;
+  const buttons = stops.map((s, i) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.textContent = s.dataset.label;
+    b.addEventListener('click', () => go(i));
+    btnWrap.appendChild(b);
+    return b;
+  });
+  function go(i) {
+    stops.forEach((s, j) => s.classList.toggle('active', j === i));
+    buttons.forEach((b, j) => b.setAttribute('aria-pressed', j === i ? 'true' : 'false'));
+    range.value = i;
+    range.setAttribute('aria-valuetext', stops[i].dataset.label);
+    prev.disabled = i === 0;
+    next.disabled = i === stops.length - 1;
+    current = i;
+  }
+  let current = 0;
+  range.addEventListener('input', () => go(+range.value));
+  prev.addEventListener('click', () => { if (current > 0) go(current - 1); });
+  next.addEventListener('click', () => { if (current < stops.length - 1) go(current + 1); });
+  go(0);
+</script>
+</body>
+</html>
